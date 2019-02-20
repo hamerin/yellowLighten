@@ -1,1 +1,1 @@
-worker: python3 app_start.py
+worker: python app_start.py
