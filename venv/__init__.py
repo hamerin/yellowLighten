@@ -2,8 +2,6 @@
 import discord
 import asyncio
 
-TOKEN = 'NTQ3ODI1ODY1NzkxMjQyMjQw.D08aNw.oA-c0PoqIf2z6ua1BymrbRtIRRg'
-
 client = discord.Client()
 
 @client.event
@@ -22,5 +20,3 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
-
-client.run(TOKEN)
