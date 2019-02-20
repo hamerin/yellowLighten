@@ -1,1 +1,1 @@
-worker: python venv/app.py
+worker: python3 venv/app.py
