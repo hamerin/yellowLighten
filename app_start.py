@@ -1,5 +1,9 @@
 from venv import client
-TOKEN = 'NTQ3ODI1ODY1NzkxMjQyMjQw.D08aNw.oA-c0PoqIf2z6ua1BymrbRtIRRg'
+from boto.s3.connection import S3Connection
+import os
+
+s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
+TOKEN = ''
 
 if __name__ == '__main__':
     client.run(TOKEN)
