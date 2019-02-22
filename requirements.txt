@@ -3,5 +3,7 @@ async-timeout==3.0.1
 chardet==3.0.4
 discord==0.16.12
 discord.py==0.16.12
+dnspython==1.16.0
 multidict==4.5.2
+pymongo==3.7.2
 websockets==3.4
