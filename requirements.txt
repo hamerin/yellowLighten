@@ -1,7 +1,9 @@
 aiohttp==1.0.5
 async-timeout==3.0.1
+asyncio==3.4.3
 beautifulsoup4==4.7.1
-certifi==2019.3.9
+bs4==0.0.1
+certifi==2018.11.29
 chardet==3.0.4
 discord==0.16.12
 discord.py==0.16.12
