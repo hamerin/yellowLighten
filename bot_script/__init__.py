@@ -8,6 +8,7 @@ import random
 import requests
 from bs4 import BeautifulSoup
 from bson.objectid import ObjectId
+from . import pokemon
 
 mclient = pymongo.MongoClient("mongodb+srv://admin:{PASSWORD}@yellowlighten-wukhb.mongodb.net/test?retryWrites=true"
                               .format(PASSWORD=os.environ['MONGODB_TOKEN']))
@@ -281,19 +282,27 @@ async def on_message(message):
     embed.add_field(name="출력", value=outp + '\n\n' + url, inline=False)
     await snd_embed(embed)
 
-    '''
   elif command == 'pokedex' or command == 'poke':
     msg_get = parsedContent.split(' ', 1)
     if len(msg_get) < 2:
       await raise_err("포켓몬의 영어 이름, 한글 이름 또는 전국도감 번호를 입력해 주세요.")
       return
+
     if check_vaild(msg_get[1], '0123456789'):
       qu = int(msg_get[1])
     else:
       qu = msg_get[1]
+
+    dex_num = -1
     for i in pokemon.name_data:
-      if i[1]==
-    '''
+      if qu in i:
+        dex_num = i[0]
+    if dex_num == -1:
+      await raise_err("없는 포켓몬입니다.")
+      return
+    else:
+      await snd_msg("찾기 결과", '{}'.format(dex_num))
+
   else:
     await snd_msg("없는 명령어", '명령어 리스트는 `{}help` 를 통해 확인해 주세요!'.format(prefix))
 
