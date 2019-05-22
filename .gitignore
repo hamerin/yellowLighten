@@ -1,4 +1,4 @@
 .env
 .idea
 .ipynb_chekpoints
-bot_scripts/__pycache__
+bot_script/__pycache__/
