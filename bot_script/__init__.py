@@ -9,6 +9,7 @@ import requests
 from bs4 import BeautifulSoup
 from bson.objectid import ObjectId
 from . import pokemon
+from . import utils
 
 mclient = pymongo.MongoClient("mongodb+srv://admin:{PASSWORD}@yellowlighten-wukhb.mongodb.net/test?retryWrites=true"
                               .format(PASSWORD=os.environ['MONGODB_TOKEN']))
@@ -25,7 +26,7 @@ async def on_message(message):
   _settings = settings_db[message.server.id].find_one()
 
   if message.server.id not in settings_db.collection_names():
-    prefix = 'yL'
+    prefix = 'yl '
     color = 0xfedb00
   else:
     prefix = _settings['prefix']
@@ -54,13 +55,6 @@ async def on_message(message):
 
   async def raise_err(__description=None, __title="잘못된 입력입니다."):
     await snd_msg(__title, __description)
-
-  def check_vaild(__str, __allowed):
-    _flg = True
-    for i in __str:
-      if i not in __allowed:
-        _flg = False
-    return _flg
 
   def factorize(n):
     while n > 1:
@@ -108,21 +102,27 @@ async def on_message(message):
         await snd_msg("접두사 설정", "접두사 설정이 취소되었습니다.")
         return
 
-      await snd_msg("접두사 설정", "설정할 접두사가 **{}** 이(가) 맞나요? (Y / N)".format(resp_1.content.strip()))
+      await snd_msg("접두사 설정", "접두사 뒤 공백을 포함할까요? (Y / N)")
 
       def check(__message):
         return __message.content == 'Y' or __message.content == 'N'
 
       resp_2 = await client.wait_for_message(author=message.author, check=check)
-      if resp_2.content == 'Y':
+      containBlank = (resp_2.content == 'Y')
+      prefixChanged = resp_1.content.strip() + ' ' if containBlank else None
+      await snd_msg("접두사 설정", "설정할 접두사가 [**{}**] 이(가) 맞나요? (Y / N)".format(prefixChanged))
+
+      resp_3 = await client.wait_for_message(author=message.author, check=check)
+      if resp_3.content == 'Y':
         break
 
     settings = copy.deepcopy(_settings)
     settings_id = settings['_id']
     settings.pop('_id', None)
-    settings['prefix'] = resp_1.content.strip()
+    settings['prefix'] = prefixChanged
     settings_db[message.server.id].replace_one({'_id': settings_id}, settings)
-    await snd_msg("접두사 설정 완료", "접두사가 **{}**로 재설정되었습니다.".format(resp_1.content.strip()))
+    await snd_msg("접두사 설정 완료", "접두사가 [**{}**]로 재설정되었습니다.".format(prefixChanged))
+    return
 
   elif command == 'color':
     msg_get = parsedContent.split(' ', 1)
@@ -148,6 +148,8 @@ async def on_message(message):
       await snd_embed(
           discord.Embed(title="색 설정 완료",
                         colour=__color))
+      return
+
     except SyntaxError:
       await raise_err()
       return
@@ -159,12 +161,15 @@ async def on_message(message):
     settings['enabled'][message.channel.id] = False
     settings_db[message.server.id].replace_one({'_id': settings_id}, settings)
     await snd_msg("채널 비활성화", "yellowLighten이 **{}** 채널에서 비활성화되었습니다 ㅜㅜ".format(message.channel.name))
+    return
 
   elif command == 'hello':
     await snd_msg('**{}**님 안녕하세요!!'.format(message.author.name))
+    return
 
   elif command == 'bye':
     await snd_msg('**{}**님 안녕히가세요...'.format(message.author.name))
+    return
 
   elif command == 'calc':
     msg_get = parsedContent.split(' ', 1)
@@ -173,7 +178,7 @@ async def on_message(message):
       return
     else:
       try:
-        if not check_vaild(msg_get[1], '0123456789+-x^/()'):
+        if not utils.check_vaild(msg_get[1], '0123456789+-x^/()'):
           await raise_err('0123456789+-x^/()만 포함될 수 있습니다.')
           return
         else:
@@ -183,6 +188,7 @@ async def on_message(message):
         await raise_err()
         return
     await snd_msg("계산 결과", msg)
+    return
 
   elif command == 'factor':
     msg_get = parsedContent.split(' ', 1)
@@ -190,7 +196,7 @@ async def on_message(message):
       await raise_err()
       return
     else:
-      if not check_vaild(msg_get[1], '0123456789'):
+      if not utils.check_vaild(msg_get[1], '0123456789'):
         await raise_err('2 이상 10000000 이하의 정수만 소인수분해할 수 있습니다.')
         return
       else:
@@ -208,9 +214,11 @@ async def on_message(message):
           msg = "{}".format(' x '.join([(str(key) if value == 1 else '{}^{}'.format(
               key, value)) for key, value in factor_dict.items()]))
     await snd_msg("소인수분해 결과", msg)
+    return
 
   elif command == 'wiki' or command == 'wiki-ko':
     msg_get = parsedContent.split(' ', 1)
+    image_url = "https://store-images.s-microsoft.com/image/apps.41885.9007199266246789.b5c9bced-c132-42c7-b8d5-8ae95a968b20.9605e2c4-06d4-46b9-8cfc-2e430b5bcab0"
     if len(msg_get) < 2:
       await raise_err()
       return
@@ -225,13 +233,15 @@ async def on_message(message):
         desc = soup.select(
             'div.mw-parser-output > p:not(.mw-empty-elt)')[0].text[:-1] + '\n\n' + url
       except IndexError:
-        await snd_msg(None, "없는 문서입니다!", "Wikipedia-ko", "https://store-images.s-microsoft.com/image/apps.41885.9007199266246789.b5c9bced-c132-42c7-b8d5-8ae95a968b20.9605e2c4-06d4-46b9-8cfc-2e430b5bcab0")
+        await snd_msg(None, "없는 문서입니다!", "Wikipedia-ko", image_url)
         return
 
-    await snd_msg(title, desc, "Wikipedia-ko", "https://store-images.s-microsoft.com/image/apps.41885.9007199266246789.b5c9bced-c132-42c7-b8d5-8ae95a968b20.9605e2c4-06d4-46b9-8cfc-2e430b5bcab0")
+    await snd_msg(title, desc, "Wikipedia-ko", image_url)
+    return
 
   elif command == 'wiki-en':
     msg_get = parsedContent.split(' ', 1)
+    image_url = "https://store-images.s-microsoft.com/image/apps.41885.9007199266246789.b5c9bced-c132-42c7-b8d5-8ae95a968b20.9605e2c4-06d4-46b9-8cfc-2e430b5bcab0"
     if len(msg_get) < 2:
       await raise_err()
       return
@@ -246,17 +256,18 @@ async def on_message(message):
         desc = soup.select(
             'div.mw-parser-output > p:not(.mw-empty-elt)')[0].text[:-1] + '\n\n' + url
       except IndexError:
-        await snd_msg(None, "없는 문서입니다!", "Wikipedia-en", "https://store-images.s-microsoft.com/image/apps.41885.9007199266246789.b5c9bced-c132-42c7-b8d5-8ae95a968b20.9605e2c4-06d4-46b9-8cfc-2e430b5bcab0")
+        await snd_msg(None, "없는 문서입니다!", "Wikipedia-en", image_url)
         return
 
-    await snd_msg(title, desc, "Wikipedia-en", "https://store-images.s-microsoft.com/image/apps.41885.9007199266246789.b5c9bced-c132-42c7-b8d5-8ae95a968b20.9605e2c4-06d4-46b9-8cfc-2e430b5bcab0")
+    await snd_msg(title, desc, "Wikipedia-en", image_url)
 
   elif command == 'boj' or command == 'baekjoon':
     msg_get = parsedContent.split(' ', 1)
+    image_url = "https://pbs.twimg.com/profile_images/804340136259428353/fZud08Ao_400x400.jpg"
     if len(msg_get) < 2:
       await raise_err()
       return
-    if not check_vaild(msg_get[1], '0123456789'):
+    if not utils.check_vaild(msg_get[1], '0123456789'):
       await raise_err('문제 번호는 정수여야 합니다.')
       return
     else:
@@ -270,13 +281,13 @@ async def on_message(message):
         inp = soup.select('#problem_input')[0].text[1:-1]
         outp = soup.select('#problem_output')[0].text[1:-1]
       except IndexError:
-        await snd_msg(None, "없는 문제입니다!", "Baekjoon Online Judge", "https://pbs.twimg.com/profile_images/804340136259428353/fZud08Ao_400x400.jpg")
+        await snd_msg(None, "없는 문제입니다!", "Baekjoon Online Judge", image_url)
         return
 
     embed = discord.Embed(title=title,
                           colour=color)
     embed.set_author(name="Baekjoon Online Judge",
-                     icon_url="https://pbs.twimg.com/profile_images/804340136259428353/fZud08Ao_400x400.jpg")
+                     icon_url=image_url)
     embed.add_field(name="문제", value=desc, inline=False)
     embed.add_field(name="입력", value=inp, inline=False)
     embed.add_field(name="출력", value=outp + '\n\n' + url, inline=False)
@@ -288,20 +299,12 @@ async def on_message(message):
       await raise_err("포켓몬의 영어 이름, 한글 이름 또는 전국도감 번호를 입력해 주세요.")
       return
 
-    if check_vaild(msg_get[1], '0123456789'):
-      qu = int(msg_get[1])
-    else:
-      qu = msg_get[1]
-
-    dex_num = -1
-    for i in pokemon.name_data:
-      if qu in i:
-        dex_num = i[0]
-    if dex_num == -1:
+    find_resp = pokemon.find(msg_get[1])
+    if not find_resp[0]:
       await raise_err("없는 포켓몬입니다.")
       return
     else:
-      await snd_msg("찾기 결과", '{}'.format(dex_num))
+      await snd_msg("찾기 결과", '{}'.format(find_resp[1]))
 
   else:
     await snd_msg("없는 명령어", '명령어 리스트는 `{}help` 를 통해 확인해 주세요!'.format(prefix))
