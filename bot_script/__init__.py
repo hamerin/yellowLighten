@@ -284,7 +284,8 @@ async def on_message(message):
 
   elif command == 'neko':
     favicon_url = "https://avatars2.githubusercontent.com/u/34457007?s=200&v=4"
-    image_url = requests.get("https://nekos.life/api/v2/img/neko").json()['url']
+    image_url = requests.get(
+        "https://nekos.life/api/v2/img/neko").json()['url']
     embed = discord.Embed(colour=color)
     embed.set_author(name="nekos.life",
                      icon_url=favicon_url)
