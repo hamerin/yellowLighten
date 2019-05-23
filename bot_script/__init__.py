@@ -91,7 +91,7 @@ async def on_message(message):
     while (True):
       await snd_msg("접두사 설정", "봇을 부를 때 사용할 접두사(prefix)를 입력해 주세요. (취소는 현재 접두사 입력)")
       resp_1 = await client.wait_for_message(author=message.author)
-      if resp_1.content == prefix:
+      if resp_1.content == prefix.strip():
         await snd_msg("접두사 설정", "접두사 설정이 취소되었습니다.")
         return
 
@@ -102,7 +102,7 @@ async def on_message(message):
 
       resp_2 = await client.wait_for_message(author=message.author, check=check)
       containBlank = (resp_2.content == 'Y')
-      prefixChanged = resp_1.content.strip() + ' ' if containBlank else None
+      prefixChanged = resp_1.content.strip() + (' ' if containBlank else None)
       await snd_msg("접두사 설정", "설정할 접두사가 [**{}**] 이(가) 맞나요? (Y / N)".format(prefixChanged))
 
       resp_3 = await client.wait_for_message(author=message.author, check=check)
