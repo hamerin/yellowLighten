@@ -102,7 +102,7 @@ async def on_message(message):
 
       resp_2 = await client.wait_for_message(author=message.author, check=check)
       containBlank = (resp_2.content == 'Y')
-      prefixChanged = resp_1.content.strip() + (' ' if containBlank else None)
+      prefixChanged = resp_1.content.strip() + (' ' if containBlank else '')
       await snd_msg("접두사 설정", "설정할 접두사가 [**{}**] 이(가) 맞나요? (Y / N)".format(prefixChanged))
 
       resp_3 = await client.wait_for_message(author=message.author, check=check)
