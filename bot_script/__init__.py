@@ -293,7 +293,7 @@ async def on_message(message):
     await snd_embed(embed)
     return
 
-  elif command in ('pokedex', 'poke'):
+  elif command in ('pokemon', 'poke'):
     if not actualContent:
       await raise_err("포켓몬의 영어 이름, 한글 이름 또는 전국도감 번호를 입력해 주세요.")
       return
