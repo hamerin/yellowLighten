@@ -1,4 +1,6 @@
 .env
 .idea
 .ipynb_chekpoints
-bot_script/__pycache__/
+__pycache__
+start.sh
+.vscode

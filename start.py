@@ -1,4 +1,4 @@
-from bot_script import client
+from src import client
 import os
 
 TOKEN = os.environ['DISCORD_TOKEN']
