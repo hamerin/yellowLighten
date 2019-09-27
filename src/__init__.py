@@ -309,22 +309,16 @@ async def on_message(message):
 
 @client.event
 async def on_channel_create(channel):
-    _settings = settingsDB[channel.server.id].find_one()
-    settings = copy.deepcopy(_settings)
-    settings_id = settings['_id']
-    settings.pop('_id', None)
-    settings['enabled'].update({channel.id: True})
-    settingsDB[channel.server.id].replace_one({'_id': settings_id}, settings)
+    serverSettingsID = {'_id': settingsDB[channel.server.id].find_one()['_id']}
+    settingsDB[channel.server.id].update(
+        serverSettingsID, {"$set": {f"enabled.{channel.id}": True}})
 
 
 @client.event
 async def on_channel_delete(channel):
-    _settings = settingsDB[channel.server.id].find_one()
-    settings = copy.deepcopy(_settings)
-    settings_id = settings['_id']
-    settings.pop('_id', None)
-    settings['enabled'].pop(channel.id, None)
-    settingsDB[channel.server.id].replace_one({'_id': settings_id}, settings)
+    serverSettingsID = {'_id': settingsDB[channel.server.id].find_one()['_id']}
+    settingsDB[channel.server.id].update(
+        serverSettingsID, {"$unset": {f"enabled.{channel.id}": False}})
 
 
 @client.event
