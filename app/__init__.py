@@ -9,8 +9,8 @@ import requests
 from bs4 import BeautifulSoup
 from bson.objectid import ObjectId
 
+from .helpers import *
 from . import pokemon
-from . import utils
 from .error import CommandError
 
 mongoClient = pymongo.MongoClient(
@@ -158,7 +158,7 @@ async def on_message(message):
         try:
             if not actualContent:
                 raise CommandError
-            if not utils.check_vaild(actualContent, '0123456789+-x^/()'):
+            if not check_vaild(actualContent, '0123456789+-x^/()'):
                 raise CommandError('0123456789+-x^/()만 포함될 수 있습니다.')
 
             sendingMessage = '{}'.format(
@@ -175,7 +175,7 @@ async def on_message(message):
         try:
             if not actualContent:
                 raise CommandError
-            if not utils.check_vaild(actualContent, '0123456789+-x^/()'):
+            if not check_vaild(actualContent, '0123456789+-x^/()'):
                 raise CommandError('0123456789+-x^/()만 포함될 수 있습니다.')
 
             num = int(actualContent)
@@ -183,7 +183,7 @@ async def on_message(message):
                 raise CommandError('2 이상 10000000 이하의 정수만 소인수분해할 수 있습니다.')
 
             factor_dict = {}
-            for factor in utils.factorize(num):
+            for factor in factorize(num):
                 if factor in factor_dict:
                     factor_dict[factor] += 1
                 else:
@@ -248,7 +248,7 @@ async def on_message(message):
         try:
             if not actualContent:
                 raise CommandError
-            if not utils.check_vaild(actualContent, '0123456789'):
+            if not check_vaild(actualContent, '0123456789'):
                 raise CommandError('문제 번호는 정수여야 합니다.')
 
             url = 'https://www.acmicpc.net/problem/{}'.format(
@@ -257,7 +257,7 @@ async def on_message(message):
             html = req.text
             soup = BeautifulSoup(html, 'html.parser')
             title = soup.select('title')[0].text
-            difficulty = utils.difficultyToString(int(requests.get(
+            difficulty = difficultyToString(int(requests.get(
                 f'https://api.solved.ac/problem_level.php?id={title.split("번")[0]}').json()['level']))
             desc = soup.select('#problem_description')[0].text[1:-1]
             inp = soup.select('#problem_input')[0].text[1:-1]

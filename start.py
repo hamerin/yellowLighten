@@ -1,4 +1,4 @@
-from src import client
+from app import client
 import os
 
 TOKEN = os.environ['DISCORD_TOKEN']

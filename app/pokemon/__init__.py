@@ -1,11 +1,12 @@
-from . import utils
-from . import data
 from bs4 import BeautifulSoup
 import requests
 
+from ..helpers import *
+from . import data
+
 
 def find(query):
-    if utils.check_vaild(query, '0123456789'):
+    if check_vaild(query, '0123456789'):
         qu = int(query)
     else:
         qu = ' '.join(map(str.capitalize, query.split()))
