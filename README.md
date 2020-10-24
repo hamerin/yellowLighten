@@ -1,3 +1,3 @@
 # yellowLighten
 
-Small discord bot of [@_hamerin](https://www.twitter.com/_hamerin)
+Small discord bot of [@hamerin_](https://www.twitter.com/hamerin_)
